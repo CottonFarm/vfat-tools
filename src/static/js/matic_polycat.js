@@ -75,11 +75,13 @@ async function getPolycatVaultInfo(App, chefContract, poolIndex) {
     const poolInfo = await chefContract.poolInfo(poolIndex);
     const poolToken = await getBscToken(App, poolInfo.want, poolInfo.strat);
     const strat = new ethers.Contract(poolInfo.strat, STRAT_ABI, App.provider);
-    poolToken.staked = await strat.wantLockedTotal() / 1e18;
-    const totalShares = await strat.sharesTotal();
-    const shares = await chefContract.userInfo(poolIndex, App.YOUR_ADDRESS);
-    //const userStaked = shares / totalShares * poolToken.staked;
-    const userStaked = shares / 10 ** poolToken.decimals;
+    poolToken.staked = await strat.wantLockedTotal() / 10 ** poolToken.decimals;
+    //const totalShares = await strat.sharesTotal();
+    const totalShares = await strat.sharesTotal() / 10 ** poolToken.decimals;
+    //const shares = await chefContract.userInfo(poolIndex, App.YOUR_ADDRESS);
+    const shares = await chefContract.userInfo(poolIndex, App.YOUR_ADDRESS) / 10 ** poolToken.decimals;
+    const userStaked = shares / totalShares * poolToken.staked;
+    //const userStaked = shares / 10 ** poolToken.decimals;
     return {
         address: poolInfo.want,
         poolToken,
